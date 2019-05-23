@@ -67,8 +67,7 @@ RUN echo PubkeyAcceptedKeyTypes +ssh-dss >> /home/hadoop/.ssh/config
 RUN echo PasswordAuthentication no >> /home/hadoop/.ssh/config
 
 # Public and private keys for Hadoop user
-COPY --chown=hadoop config/id_rsa.pub /home/hadoop/.ssh/id_rsa.pub
-COPY --chown=hadoop config/id_rsa /home/hadoop/.ssh/id_rsa
+COPY --chown=hadoop config/id_rsa config/id_rsa.pub /home/hadoop/.ssh/
 RUN cat /home/hadoop/.ssh/id_rsa.pub >> /home/hadoop/.ssh/authorized_keys
 
 
