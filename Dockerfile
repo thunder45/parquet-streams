@@ -24,8 +24,8 @@ ENV PATH $JAVA_HOME/bin:$PATH
 
 # Setup Python3 and its PIP
 RUN apt-get install -y python3 python3-pip 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # Setup SSHD
 USER root
