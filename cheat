@@ -1,6 +1,19 @@
-docker run -it --rm --name spark-master --hostname spark-master -p 7077:7077 -p 8080:8080 -p 9000:9000 -p 22:30000 --network spark_network -e "SPARK_LOCAL_IP=spark-master" -e "SPARK_MASTER_PORT=7077" -e "SPARK_MASTER_WEBUI_PORT=8080" -e "SPARK_MASTER_NODE=spark-master" thunder45/parquet-streams:hdfs /bin/bash
-docker run --rm -it --name spark-worker --hostname spark-worker --network spark_network thunder45/parquet-streams:spark-2.4.3 /bin/bash
+docker run -it --rm --name spark-master --hostname spark-master -p 7077:7077 -p 8080:8080 -p 9000:9000 -p 30000:22 --network spark_network -e "SPARK_LOCAL_IP=spark-master" -e "SPARK_MASTER_PORT=7077" -e "SPARK_MASTER_WEBUI_PORT=8080" -e "SPARK_MASTER_NODE=spark-master" thunder45/parquet-streams:hdfs_py /bin/bash
+docker run -u hadoop -it --rm --name spark-master --hostname spark-master -p 7077:7077 -p 8080:8080 -p 9000:9000 -p 30000:22 --network spark_network -e "SPARK_LOCAL_IP=spark-master" -e "SPARK_MASTER_PORT=7077" -e "SPARK_MASTER_WEBUI_PORT=8080" -e "SPARK_MASTER_NODE=spark-master" thunder45/parquet-streams:hdfs_py /bin/bash
+
+docker run --rm -it --name spark-worker --hostname spark-worker --network spark_network -e "SPARK_MASTER=spark://spark-master:7077" thunder45/parquet-streams:spark-2.4.3 /bin/bash
 
 docker run -it --rm --name spark-master --hostname spark-master -p 7077:7077 -p 8080:8080 -p 9000:9000 -p 22:30000 --network spark_network -e "SPARK_LOCAL_IP=spark-master" -e "SPARK_MASTER_PORT=7077" -e "SPARK_MASTER_WEBUI_PORT=8080" -e "SPARK_MASTER_NODE=spark-master" thunder45/parquet-streams:hdfs /bin/bash
 
 docker inspect --format='{{json .Config}}' spark-master
+
+ ssh-keygen -t rsa -P '' -f config/id_rsa
+
+docker network create --driver bridge sparknet # create custom network
+docker run -dP --network spark_network --name spark-master --hostname spark-master  -e "SPARK_MASTER_NODE=spark-master" thunder45/parquet-streams:hdfs_py
+docker run -dP --network spark_network --name spark-worker --hostname spark-worker  -e "SPARK_MASTER_NODE=spark-master" "SPARK_MASTER=spark://spark-master:7077" thunder45/parquet-streams:hdfs_py
+docker exec -u hadoop -it spark-master hadoop/bin/hdfs namenode -format
+docker exec -u hadoop -it spark-master /home/hadoop/hadoopcmd.sh start
+#docker exec -u hadoop -it spark-worker /home/hadoop/hadoopcmd.sh start
+docker exec -u hadoop -it spark-master /home/hadoop/sparkcmd.sh start
+docker exec -u hadoop -it spark-worker /home/hadoop/sparkcmd.sh start
