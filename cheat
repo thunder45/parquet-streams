@@ -7,8 +7,8 @@ docker run -dP --network spark_network --name spark-master --hostname spark-mast
 docker run -dP --network spark_network --name spark-worker --hostname spark-worker  -e "SPARK_MASTER_NODE=spark-master" "SPARK_MASTER=spark://spark-master:7077" thunder45/parquet-streams:hdfs_py
 
 # Start nodes exposing and mapping all relevant port and detach
-docker run -d -p 30000:22 -p 7077:7077 -p 8080:8080 -p 8088:8088 -p 9000:9000 -p 9870:9870 --network spark_network --name spark-master --hostname spark-master  -e "SPARK_MASTER_NODE=spark-master" thunder45/parquet-streams:hdfs_py
-docker run -d -p 31000:22 -p 17077:7077 -p 18080:8080 -p 18088:8088 -p 19000:9000 -p 19870:9870 --network spark_network --name spark-worker --hostname spark-worker  -e "SPARK_MASTER_NODE=spark-master" "SPARK_MASTER=spark://spark-master:7077" thunder45/parquet-streams:hdfs_py
+docker run -d -p 30000:22 -p 7077:7077 -p 8080:8080 -p 18080:8081 -p 8088:8088 -p 9000:9000 -p 9870:9870 -p 8888:8888 --network spark_network --name spark-master --hostname spark-master  -e "SPARK_MASTER_NODE=spark-master" thunder45/parquet-streams:hdfs_py
+docker run -d -p 32000:22 -p 27077:7077 -p 28080:8080 -p 28080:8081 -p 28088:8088 -p 29000:9000 -p 29870:9870 -p 28888:8888 --network spark_network --name spark-worker --hostname spark-worker  -e "SPARK_MASTER_NODE=spark-master" "SPARK_MASTER=spark://spark-master:7077" thunder45/parquet-streams:hdfs_py
 
 # Format HDFS namenode
 docker exec -u hadoop -it spark-master hadoop/bin/hdfs namenode -format
@@ -22,9 +22,13 @@ docker exec -u hadoop -it spark-master /home/hadoop/sparkcmd.sh start
 docker exec -u hadoop -it spark-worker /home/hadoop/sparkcmd.sh start
 
 # PI calculation Demo.
-docker exec -u hadoop -it spark-worker spark/bin/spark-submit --master spark://spark-master:7077 --class org.apache.spark.examples.SparkPi spark/examples/jars/spark-examples_2.11-2.4.3.jar 1000
+docker exec -u hadoop -it spark-worker /bin/bash
+spark/bin/spark-submit --master spark://spark-master:7077 --class org.apache.spark.examples.SparkPi spark/examples/jars/spark-examples_2.11-2.4.3.jar 1000
+
+docker exec -u hadoop -it spark-worker /bin/bash 
+spark/bin/spark-submit --master spark://spark-master:7077 /home/hadoop/spark/examples/src/main/python/pi.py 10
 
 # General stuff
 docker inspect --format='{{json .Config}}' spark-master
-docker-compose up --scale spark-worker=3
+docker-compose up --scale spark-worker=2
 

@@ -10,12 +10,13 @@ services:
       - "9000:9000"
       - "8088:8088"
       - "9870:9870"
-      - "22:22"
+      - "30000:22"
+      - "30000:22/udp"
+      - "8888:8888"
     networks:
       - spark-network
     environment:
       - "SPARK_LOCAL_IP=spark-master"
-      - "SPARK_MASTER_WEBUI_PORT=8080"
   spark-worker:
     image: $MYNAME/$IMAGE:$TAG
     container_name: spark-worker
@@ -23,12 +24,13 @@ services:
     depends_on:
       - spark-master
     ports:
-      - 8080
-      - 22
+      - "24040:4040"
+      - "28081:8081"
+      - "32000:22"
+      - "32000:22/udp"
+      - "28888:8888"
     networks:
       - spark-network
-    environment:
-      - "SPARK_WORKER_WEBUI_PORT=8080"
 networks:
   spark-network:
     driver: bridge
