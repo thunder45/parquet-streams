@@ -98,11 +98,8 @@ RUN mkdir /home/hadoop/hadoop/logs && \
     echo "export SPARK_MASTER_WEBUI_PORT=8080" >> /home/hadoop/.profile && \
     echo "export SPARK_MASTER_WEBUI_PORT=8080" >> /home/hadoop/.bashrc
 
-COPY --chown=hadoop config/sparkcmd.sh config/hadoopcmd.sh /home/hadoop/
+COPY --chown=hadoop config/sparkcmd.sh config/hadoopcmd.sh entry.sh /home/hadoop/
 COPY --chown=hadoop config/workers config/core-site.xml config/hdfs-site.xml config/mapred-site.xml config/yarn-site.xml /home/hadoop/hadoop/etc/hadoop/
 
 USER root
-CMD exec /usr/sbin/sshd -D & && \
-    su - hadoop -c "/home/hadoop/hadoopcmd.sh start" && \
-    su - hadoop -c "/home/hadoop/sparkcmd.sh start" && \
-    sleep infinity
+CMD /home/hadoop/entry.sh
